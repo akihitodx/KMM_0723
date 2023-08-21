@@ -65,6 +65,24 @@ void Match::getPath(Graph &query, VertexID is_query,VertexID another) {
     }
 
 }
+bool Match::set_Match_exc(Graph &query,Graph &data,Index &index,VertexID is_query,VertexID data_node,VertexID another_data_node){
+    getPath(query,is_query);
+//    getUnkernel_path(query,is_query);
+    this->match_table.clear();
+    this->match_table.resize(query.vNum);
+    this->match_table[is_query].push_back(data_node);
+    auto flag = unKernel_Match(is_query,data_node,query,data,index,*this);
+    if(!flag) return flag;
+    int count = 0;
+    for(auto i: query.kernel->neighbor_unkernel[is_query]){
+        if(std::find(match_table[i].begin(), match_table[i].end(),another_data_node)!=match_table[i].end()){
+            ++count;
+        }
+    }
+    if(count==0) return false;
+    this->kernel_matched.insert(is_query);
+    return flag;
+}
 
 bool Match::set_Match_single(Graph &query,Graph &data,Index &index,VertexID is_query,VertexID data_node,VertexID is_query_unkernel,VertexID data_node_unkernel){
     getPath(query,is_query);

@@ -34,8 +34,11 @@ void updateIndex(VertexID node, VertexID nei ,Graph &query, Graph &data, Index &
     }
 }
 
-void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match){
+void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match,VertexID query_exc, VertexID data_exc){
     if (match.count == match.kernel_path.size()) {
+//        if(query_exc == -1 || match.match_table[query_exc][0] != data_exc){
+//            match.res.push_back(match.match_table);
+//        }
         match.res.push_back(match.match_table);
         return;
     }
@@ -43,7 +46,7 @@ void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match){
     VertexID next = match.kernel_path[match.count].second;
     for (auto m_id: match.match_table[is_query]) {
         for (auto i: data.node_adj[m_id]) {
-            if (data.node_label[i] != query.node_label[next]  ||  index.com_index[i].find(next) == index.com_index[i].end()) {
+            if (data.node_label[i] != query.node_label[next]  ||  index.com_index[i].find(next) == index.com_index[i].end() || (query_exc == next && data_exc == i)) {
                 continue;
             }
             auto old_match = match.match_table;
@@ -56,7 +59,7 @@ void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match){
             }
             if(flag){
                 match.kernel_matched.insert(next);
-                Kernel_Match(query, data, index,match);
+                Kernel_Match(query, data, index,match,query_exc,data_exc);
                 match.kernel_matched.erase(next);
                 --match.count;
                 match.match_table = old_match;
@@ -154,33 +157,39 @@ void do_submatch(set<pair<VertexID,VertexID>> &match_edge,VertexID first,VertexI
         if(left_is_kernel && right_is_kernel){
             Match mm;
             ff = mm.set_Match_double(query,data,index,edge.first,first,edge.second,second);
-            if(!ff) continue;
-            Kernel_Match(query,data,index,mm);
-            result = result + mm.res;
+            if(ff){
+                Kernel_Match(query,data,index,mm,-1,-1);
+                result = result + mm.res;
+            }
 
             Match m1 ;
-            ff = m1.set_Match_single(query,data,index,edge.first,first,edge.second,second);
-            if(!ff) continue;
-            Kernel_Match(query,data,index,m1);
-            result = result + m1.res;
+//            ff = m1.set_Match_exc(query,data,index,edge.first,first,second);
+            ff = m1.set_Match_exc(query,data,index,edge.first,first,second);
+            if(ff){
+//                Kernel_Match(query,data,index,m1,edge.second,second);
+                Kernel_Match(query,data,index,m1,edge.second,second);
+                result = result + m1.res;
+            }
 
             Match m2 ;
-            ff = m2.set_Match_single(query,data,index,edge.second,second,edge.first,first);
-            if(!ff) continue;
-            Kernel_Match(query,data,index,m2);
-            result = result + m2.res;
+            ff = m2.set_Match_exc(query,data,index,edge.second,second,first);
+            if(ff){
+//                Kernel_Match(query,data,index,m2,edge.first,first);
+                Kernel_Match(query,data,index,m2,edge.first,first);
+                result = result + m2.res;
+            }
         }else{
             if(left_is_kernel){
                 Match m1 ;
                 ff = m1.set_Match_single(query,data,index,edge.first,first,edge.second,second);
                 if(!ff) continue;
-                Kernel_Match(query,data,index,m1);
+                Kernel_Match(query,data,index,m1,-1,-1);
                 result = result + m1.res;
             }else{
                 Match m2 ;
                 ff = m2.set_Match_single(query,data,index,edge.second,second,edge.first,first);
                 if(!ff) continue;
-                Kernel_Match(query,data,index,m2);
+                Kernel_Match(query,data,index,m2,-1,-1);
                 result = result + m2.res;
             }
         }

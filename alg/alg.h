@@ -11,7 +11,7 @@ void preProsessing(Graph &query, Graph &data,Index &index);
 
 void updateIndex(VertexID node, VertexID nei ,Graph &query, Graph &data, Index &index);
 
-void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match);
+void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match,VertexID query_exc, VertexID data_exc);
 
 bool unKernel_Match(VertexID is_query,VertexID data_node, Graph &query, Graph &data, Index &index, Match &match);
 
