@@ -45,6 +45,10 @@ void Graph::readGraph(const string &path){
         if(node_label[id_0]<node_label[id_1]){
             label_group = {node_label[id_0],node_label[id_1]};
             this->edge_count[label_group].insert({id_0, id_1});
+        }else if(node_label[id_0] == node_label[id_1]){
+            label_group = {node_label[id_0],node_label[id_1]};
+            this->edge_count[label_group].insert({id_0, id_1});
+            this->edge_count[label_group].insert({id_1, id_0});
         }else{
             label_group = {node_label[id_1],node_label[id_0]};
             this->edge_count[label_group].insert({id_1, id_0});

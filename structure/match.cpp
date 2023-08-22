@@ -73,14 +73,15 @@ bool Match::set_Match_exc(Graph &query,Graph &data,Index &index,VertexID is_quer
     this->match_table[is_query].push_back(data_node);
     auto flag = unKernel_Match(is_query,data_node,query,data,index,*this);
     if(!flag) return flag;
-    int count = 0;
+    int num = 0;
     for(auto i: query.kernel->neighbor_unkernel[is_query]){
         if(std::find(match_table[i].begin(), match_table[i].end(),another_data_node)!=match_table[i].end()){
-            ++count;
+            ++num;
         }
     }
-    if(count==0) return false;
+    if(num == 0) return false;
     this->kernel_matched.insert(is_query);
+    this->matched.insert(data_node);
     return flag;
 }
 
@@ -94,6 +95,7 @@ bool Match::set_Match_single(Graph &query,Graph &data,Index &index,VertexID is_q
     if(!flag) return flag;
     this->match_table[is_query_unkernel] = {data_node_unkernel};
     this->kernel_matched.insert(is_query);
+    this->matched.insert(data_node);
     return flag;
 }
 
@@ -107,9 +109,30 @@ bool Match::set_Match_double(Graph &query,Graph &data,Index &index,VertexID is_q
     auto flag = unKernel_Match(is_query,data_node,query,data,index,*this);
     if(!flag) return flag;
     this->kernel_matched.insert(is_query);
+    this->matched.insert(data_node);
 
     flag = unKernel_Match(is_query_another,data_node_another,query,data,index,*this);
     if(!flag) return flag;
     this->kernel_matched.insert(is_query_another);
+    this->matched.insert(data_node_another);
+
     return flag;
+}
+
+
+bool Match::verification(vector<vector<VertexID>> &ret) {
+    for(int i = 0;i<ret.size();++i){
+        if(this->kernel_matched.count(i) != 0) continue;
+        vector<VertexID> temp(ret[i].size(),-1);
+        for(auto e :ret[i]){
+            if(this->matched.count(e) == 0) return false;
+        }
+    }
+    return true;
+}
+
+void Match::insert_res(vector<vector<VertexID>> &ret) {
+    if(verification(ret)){
+        this->res.push_back(this->match_table);
+    }
 }

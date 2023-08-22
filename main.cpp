@@ -15,9 +15,13 @@ int main() {
 //    string data_path = "../test/insert/data_graph/data.graph";
 //    string insert_path = "../test/insert/data_graph/insertion.graph";
 
-    string query_path = "../test/querySet";
-    string data_path = "../test/dataSet";
-    string insert_path = "../test/insert_demo";
+//    string query_path = "../test/querySet";
+//    string data_path = "../test/dataSet";
+//    string insert_path = "../test/insert_demo";
+
+    string query_path = "../test/simple_test/query_demo3";
+    string data_path = "../test/simple_test/data_demo3";
+    string insert_path = "../test/simple_test/insert_demo3";
 
     Graph *query = new Graph();
     query->readGraph(query_path);

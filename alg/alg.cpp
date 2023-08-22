@@ -46,7 +46,8 @@ void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match,VertexID
     VertexID next = match.kernel_path[match.count].second;
     for (auto m_id: match.match_table[is_query]) {
         for (auto i: data.node_adj[m_id]) {
-            if (data.node_label[i] != query.node_label[next]  ||  index.com_index[i].find(next) == index.com_index[i].end() || (query_exc == next && data_exc == i)) {
+            if(match.matched.count(i) != 0) continue;
+            if(data.node_label[i] != query.node_label[next]  ||  index.com_index[i].find(next) == index.com_index[i].end() || (query_exc == next && data_exc == i)) {
                 continue;
             }
             auto old_match = match.match_table;
@@ -59,7 +60,9 @@ void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match,VertexID
             }
             if(flag){
                 match.kernel_matched.insert(next);
+                match.matched.insert(i);
                 Kernel_Match(query, data, index,match,query_exc,data_exc);
+                match.matched.erase(i);
                 match.kernel_matched.erase(next);
                 --match.count;
                 match.match_table = old_match;
@@ -78,7 +81,7 @@ bool unKernel_Match(VertexID is_query,VertexID data_node, Graph &query, Graph &d
     for(VertexID qid: unkernel_set){
         vector<VertexID> temp;
         for (auto i: data.node_adj[data_node]) {
-            if (data.node_label[i] != query.node_label[qid] ){
+            if (data.node_label[i] != query.node_label[qid] || match.matched.count(i) != 0){
                 continue;
             }
             temp.push_back(i);
@@ -103,7 +106,7 @@ void subgraph_Match(VertexID left_node,VertexID right_node,Graph &query,Graph &d
 //    if(data.node_label[left_node]==data.node_label[right_node]){
 //        //考虑等价->同构
 //    }
-    set<pair<VertexID,VertexID>> match_edge;
+                                                                                                set<pair<VertexID,VertexID>> match_edge;
     auto it = query.edge_count.find({left_label,right_label});
     if(it != query.edge_count.end()){
         do_submatch(it->second,left_node,right_node,query,data,index,result);
