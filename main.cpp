@@ -37,13 +37,15 @@ int main() {
         cout << insert_path << " open failed" << endl;
         exit(0);
     }
-    char t;
-    int a, b, c;
+
+
     int i = 0;
     vector<pair<int, int>> res;
     vector<int> res1;
     while (!ifs.eof()) {
         cout << i++;
+        char t;
+        int a, b, c;
         ifs >> t >> a >> b >> c;
         bool f = do_main(a, b, *query, *data, *index);
         if (f) {

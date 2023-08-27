@@ -39,7 +39,7 @@ void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match,VertexID
 //        if(query_exc == -1 || match.match_table[query_exc][0] != data_exc){
 //            match.res.push_back(match.match_table);
 //        }
-        match.res.push_back(match.match_table);
+        match.insert_res();
         return;
     }
     VertexID is_query = match.kernel_path[match.count].first;
@@ -79,7 +79,7 @@ void Kernel_Match(Graph &query, Graph &data, Index &index, Match &match,VertexID
 bool unKernel_Match(VertexID is_query,VertexID data_node, Graph &query, Graph &data, Index &index, Match &match){
     auto unkernel_set = query.kernel->neighbor_unkernel[is_query];
     for(VertexID qid: unkernel_set){
-        vector<VertexID> temp;
+        list<VertexID> temp;
         for (auto i: data.node_adj[data_node]) {
             if (data.node_label[i] != query.node_label[qid] || match.matched.count(i) != 0){
                 continue;
@@ -131,6 +131,10 @@ bool do_main(VertexID a,VertexID b,Graph &query, Graph &data,Index &index){
     Result *res = new Result();
     subgraph_Match(a,b,query,data,index,*res);
     res->print_res();
+
+    res->get_res_split(query);
+//    res->print_res_split();
+
     end = clock();
     elapsedTime = static_cast<double>(end-begin) / CLOCKS_PER_SEC;
     cout<<"elapsedTime:"<<elapsedTime<<endl;

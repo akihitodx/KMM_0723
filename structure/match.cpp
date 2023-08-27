@@ -9,8 +9,8 @@ void Match::getPath(Graph &query, VertexID is_query) {
     kernel_path.clear();
     queue<VertexID> qqq;
     queue<VertexID> other;
-    unordered_set<int> matched;
-    matched.insert(is_query);
+    unordered_set<VertexID> over;
+    over.insert(is_query);
     for(auto i : query.kernel->neighbor_kernel[is_query]){
         qqq.push(i);
         other.push(is_query);
@@ -18,12 +18,12 @@ void Match::getPath(Graph &query, VertexID is_query) {
     while(!qqq.empty()){
         auto temp = qqq.front();
         qqq.pop();
-        matched.insert(temp);
+        over.insert(temp);
         auto f = other.front();
         other.pop();
         kernel_path.emplace_back(f,temp);
         for(auto i : query.kernel->neighbor_kernel[temp]){
-            if(matched.find(i)==matched.end()){
+            if(over.find(i) == over.end()){
                 qqq.push(i);
                 other.push(temp);
             }
@@ -36,8 +36,8 @@ void Match::getPath(Graph &query, VertexID is_query,VertexID another) {
     kernel_path.clear();
     queue<VertexID> qqq;
     queue<VertexID> other;
-    unordered_set<int> matched;
-    matched.insert(is_query);
+    unordered_set<VertexID> over;
+    over.insert(is_query);
     for(auto i : query.kernel->neighbor_kernel[is_query]){
         qqq.push(i);
         other.push(is_query);
@@ -45,12 +45,12 @@ void Match::getPath(Graph &query, VertexID is_query,VertexID another) {
     while(!qqq.empty()){
         auto temp = qqq.front();
         qqq.pop();
-        matched.insert(temp);
+        over.insert(temp);
         auto f = other.front();
         other.pop();
         kernel_path.emplace_back(f,temp);
         for(auto i : query.kernel->neighbor_kernel[temp]){
-            if(matched.find(i)==matched.end()){
+            if(over.find(i) == over.end()){
                 qqq.push(i);
                 other.push(temp);
             }
@@ -120,19 +120,26 @@ bool Match::set_Match_double(Graph &query,Graph &data,Index &index,VertexID is_q
 }
 
 
-bool Match::verification(vector<vector<VertexID>> &ret) {
-    for(int i = 0;i<ret.size();++i){
+bool Match::verification(){
+    for(int i = 0;i<this->match_table.size();++i){
         if(this->kernel_matched.count(i) != 0) continue;
-        vector<VertexID> temp(ret[i].size(),-1);
-        for(auto e :ret[i]){
-            if(this->matched.count(e) == 0) return false;
+        auto it = match_table[i].begin();
+        while(it != match_table[i].end()){
+            if(this->matched.count(*it) != 0){
+                it = this->match_table[i].erase(it);
+            } else{
+                ++it;
+            }
         }
+        if(this->match_table[i].empty()) return false;
     }
     return true;
 }
 
-void Match::insert_res(vector<vector<VertexID>> &ret) {
-    if(verification(ret)){
+void Match::insert_res(){
+    if(verification()){
         this->res.push_back(this->match_table);
     }
 }
+
+
